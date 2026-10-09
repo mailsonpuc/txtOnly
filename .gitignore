@@ -7,7 +7,7 @@
 .env
 /bin 
 /obj 
-
+*.txt
 # User-specific files
 *.rsuser
 *.suo

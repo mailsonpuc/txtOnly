@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="txtOnly.Domain/txtOnly.Domain.csproj" />
   <Project Path="txtOnly.Infrastructure/txtOnly.Infrastructure.csproj" />
+  <Project Path="txtOnly.Tests/txtOnly.Tests.csproj" />
 </Solution>
