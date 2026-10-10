@@ -1,6 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.12" />
+    <PackageReference Include="NSwag.AspNetCore" Version="14.7.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\txtOnly.Application\txtOnly.Application.csproj" />
     <ProjectReference Include="..\txtOnly.Domain\txtOnly.Domain.csproj" />
     <ProjectReference Include="..\txtOnly.Infrastructure\txtOnly.Infrastructure.csproj" />
