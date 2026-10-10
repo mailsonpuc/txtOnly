@@ -1,4 +1,7 @@
 <Solution>
+  <Project Path="txtOnly.API/txtOnly.API.csproj" />
+  <Project Path="txtOnly.Application/txtOnly.Application.csproj" />
+  <Project Path="txtOnly.CrossCutting/txtOnly.CrossCutting.csproj" />
   <Project Path="txtOnly.Domain/txtOnly.Domain.csproj" />
   <Project Path="txtOnly.Infrastructure/txtOnly.Infrastructure.csproj" />
   <Project Path="txtOnly.Tests/txtOnly.Tests.csproj" />

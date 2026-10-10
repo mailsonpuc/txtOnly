@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\txtOnly.Domain\txtOnly.Domain.csproj" />
+    <ProjectReference Include="..\txtOnly.Application\txtOnly.Application.csproj" />
   </ItemGroup>
 
 </Project>
