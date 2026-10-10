@@ -40,7 +40,7 @@ public class User
 
         var normalizedBio = string.IsNullOrWhiteSpace(bio) ? string.Empty : bio.Trim();
 
-        DomainExceptionValidation.When(normalizedBio.Length > 500, "Bio cannot exceed 500 characters.");
+        DomainExceptionValidation.When(normalizedBio.Length > 200, "Bio cannot exceed 200 characters.");
 
         Bio = normalizedBio;
     }

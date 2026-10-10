@@ -64,7 +64,7 @@ public class Post
         var normalizedContent = content.Trim();
 
         DomainExceptionValidation.When(string.IsNullOrWhiteSpace(normalizedContent), "Content is required.");
-        DomainExceptionValidation.When(normalizedContent.Length > 500, "Content cannot exceed 500 characters.");
+        DomainExceptionValidation.When(normalizedContent.Length > 4000, "Content cannot exceed 4000 characters.");
 
         return normalizedContent;
     }
