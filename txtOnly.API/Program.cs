@@ -1,4 +1,7 @@
+using txtOnly.CrossCutting.IoC;
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddInfrastructureAPI(builder.Configuration);
 
 // Add services to the container.
 

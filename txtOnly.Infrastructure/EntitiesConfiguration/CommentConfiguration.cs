@@ -22,7 +22,7 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
         builder.HasOne(x => x.User)
             .WithMany(x => x.Comments)
             .HasForeignKey(x => x.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.ClientCascade);
 
         builder.HasOne(x => x.Post)
             .WithMany(x => x.Comments)

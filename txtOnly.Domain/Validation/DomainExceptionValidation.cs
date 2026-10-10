@@ -1,17 +1,13 @@
 namespace txtOnly.Domain.Validation;
 
-public class DomainExceptionValidation
+public class DomainExceptionValidation : Exception
 {
-    public static void When(bool invalidCondition, string message)
-    {
-        if (invalidCondition)
-            throw new DomainException(message);
-    }
-}
+    public DomainExceptionValidation(string error) : base(error)
+    { }
 
-public class DomainException : Exception
-{
-    public DomainException(string message) : base(message)
+    public static void When(bool hasError, string error)
     {
+        if (hasError)
+            throw new DomainExceptionValidation(error);
     }
 }

@@ -24,21 +24,21 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasMany(x => x.Comments)
             .WithOne(x => x.User)
             .HasForeignKey(x => x.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.ClientCascade);
 
         builder.HasMany(x => x.Likes)
             .WithOne(x => x.User)
             .HasForeignKey(x => x.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.ClientCascade);
 
         builder.HasMany(x => x.Followers)
             .WithOne(x => x.Following)
             .HasForeignKey(x => x.FollowingId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.ClientCascade);
 
         builder.HasMany(x => x.Following)
             .WithOne(x => x.Follower)
             .HasForeignKey(x => x.FollowerId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.ClientCascade);
     }
 }
