@@ -22,7 +22,7 @@ public class FollowTests
     [Fact]
     public void Deve_Lancar_Excecao_Quando_FollowerId_For_Vazio()
     {
-        var exception = Assert.Throws<DomainException>(() => new Follow(Guid.Empty, Guid.NewGuid()));
+        var exception = Assert.Throws<DomainExceptionValidation>(() => new Follow(Guid.Empty, Guid.NewGuid()));
 
         Assert.Equal("FollowerId is required.", exception.Message);
     }
@@ -30,7 +30,7 @@ public class FollowTests
     [Fact]
     public void Deve_Lancar_Excecao_Quando_FollowingId_For_Vazio()
     {
-        var exception = Assert.Throws<DomainException>(() => new Follow(Guid.NewGuid(), Guid.Empty));
+        var exception = Assert.Throws<DomainExceptionValidation>(() => new Follow(Guid.NewGuid(), Guid.Empty));
 
         Assert.Equal("FollowingId is required.", exception.Message);
     }
@@ -40,7 +40,7 @@ public class FollowTests
     {
         var userId = Guid.NewGuid();
 
-        var exception = Assert.Throws<DomainException>(() => new Follow(userId, userId));
+        var exception = Assert.Throws<DomainExceptionValidation>(() => new Follow(userId, userId));
 
         Assert.Equal("A user cannot follow themselves.", exception.Message);
     }

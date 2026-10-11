@@ -4,6 +4,7 @@ using txtOnly.Application.Mappings;
 using txtOnly.Domain.Entities;
 using txtOnly.Domain.Interfaces;
 using txtOnly.Domain.Pagination;
+using txtOnly.Application.Validation;
 
 namespace txtOnly.Application.Services;
 
@@ -20,18 +21,10 @@ public class PostService : IPostService
         _userRepository = userRepository;
     }
 
-    public async Task<IQueryable<PostDTO>> GetPostsAsync()
+    public async Task<List<PostDTO>> GetPostsAsync()
     {
         var posts = await _postRepository.GetPostsAsync();
-        return posts.Select(post => new PostDTO
-        {
-            PostId = post.PostId,
-            Content = post.Content,
-            CreatedAt = post.CreatedAt,
-            UpdatedAt = post.UpdatedAt,
-            IsDeleted = post.IsDeleted,
-            UserId = post.UserId
-        });
+        return posts.Select(post => post.ToPostDTO()).ToList();
     }
 
     public async Task<PagedList<PostDTO>> GetPostsPagedAsync(int pageNumber, int pageSize)
@@ -57,7 +50,7 @@ public class PostService : IPostService
     public async Task<PostDTO> CreateAsync(PostCreateDTO post)
     {
         ArgumentNullException.ThrowIfNull(post);
-        await EnsureUserExistsAsync(post.UserId);
+        await EntityValidation.EnsureUserExistsAsync(_userRepository, post.UserId);
         var createdPost = await _postRepository.CreateAsync(post.ToPost());
         await _unitOfWork.CommitAsync();
         return createdPost.ToPostDTO();
@@ -104,11 +97,4 @@ public class PostService : IPostService
             ?? throw new KeyNotFoundException("Publicação não encontrada.");
     }
 
-    private async Task EnsureUserExistsAsync(Guid userId)
-    {
-        if (userId == Guid.Empty)
-            throw new ArgumentException("O usuário é obrigatório.", nameof(userId));
-        if (await _userRepository.GetByIdAsync(userId) is null)
-            throw new KeyNotFoundException("Usuário não encontrado.");
-    }
 }

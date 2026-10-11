@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using txtOnly.Application.DTOs;
 using txtOnly.Application.Interfaces;
-using txtOnly.Domain.Validation;
 
 namespace txtOnly.API.Controllers;
 
@@ -23,6 +22,7 @@ public class LikesController : ControllerBase
     public async Task<ActionResult<object>> GetPaged(Guid postId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var likes = await _likeService.GetLikesPagedAsync(postId, pageNumber, pageSize);
+        PaginationHeader.Add(Response, likes);
         return Ok(new
         {
             items = likes,
@@ -40,27 +40,8 @@ public class LikesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<LikeDTO>> Create([FromBody] LikeCreateDTO like)
     {
-        try
-        {
-            var createdLike = await _likeService.CreateAsync(like);
-            return StatusCode(StatusCodes.Status201Created, createdLike);
-        }
-        catch (ArgumentException exception)
-        {
-            return BadRequest(new { message = exception.Message });
-        }
-        catch (DomainExceptionValidation exception)
-        {
-            return BadRequest(new { message = exception.Message });
-        }
-        catch (KeyNotFoundException exception)
-        {
-            return NotFound(new { message = exception.Message });
-        }
-        catch (InvalidOperationException exception)
-        {
-            return Conflict(new { message = exception.Message });
-        }
+        var createdLike = await _likeService.CreateAsync(like);
+        return StatusCode(StatusCodes.Status201Created, createdLike);
     }
 
     [HttpDelete("user/{userId:guid}/post/{postId:guid}")]
@@ -68,14 +49,7 @@ public class LikesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid userId, Guid postId)
     {
-        try
-        {
-            await _likeService.RemoveAsync(new LikeDTO { UserId = userId, PostId = postId });
-            return NoContent();
-        }
-        catch (KeyNotFoundException exception)
-        {
-            return NotFound(new { message = exception.Message });
-        }
+        await _likeService.RemoveAsync(new LikeDTO { UserId = userId, PostId = postId });
+        return NoContent();
     }
 }

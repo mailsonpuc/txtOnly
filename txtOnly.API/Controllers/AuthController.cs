@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using txtOnly.Infrastructure.Identity;
 using txtOnly.Infrastructure.Identity.Interfaces;
 using txtOnly.Infrastructure.Identity.Models;
@@ -81,6 +82,7 @@ public class AuthController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("login")]
+    [EnableRateLimiting("loginRateLimit")]
     [ProducesResponseType(typeof(TokenDTO), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ResponseDTO), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ResponseDTO), StatusCodes.Status401Unauthorized)]

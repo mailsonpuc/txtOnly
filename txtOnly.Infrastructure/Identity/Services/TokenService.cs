@@ -26,6 +26,12 @@ public class TokenService : ITokenService
 
     public async Task<TokenDTO> CreateTokenAsync(txtOnly.Infrastructure.Identity.ApplicationUser user)
     {
+        return await CreateAndPersistTokenAsync(user)
+            ?? throw new InvalidOperationException("Unable to persist token state.");
+    }
+
+    private async Task<TokenDTO?> CreateAndPersistTokenAsync(txtOnly.Infrastructure.Identity.ApplicationUser user)
+    {
         var roles = await _userManager.GetRolesAsync(user);
         var claims = new List<Claim>
         {
@@ -40,7 +46,9 @@ public class TokenService : ITokenService
 
         user.RefreshToken = GenerateRefreshToken();
         user.RefreshTokenExpiryTime = GetRefreshTokenExpiration();
-        await _userManager.UpdateAsync(user);
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+            return null;
 
         return new TokenDTO
         {
@@ -53,12 +61,12 @@ public class TokenService : ITokenService
     public async Task<TokenDTO?> RefreshTokenAsync(string refreshToken)
     {
         var user = await _userManager.Users.SingleOrDefaultAsync(item => item.RefreshToken == refreshToken);
-        if (user is null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+        if (user is null || user.RefreshTokenExpiryTime is null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
         {
             return null;
         }
 
-        return await CreateTokenAsync(user);
+        return await CreateAndPersistTokenAsync(user);
     }
 
     public JwtSecurityToken GenerateAccessToken(IEnumerable<Claim> claims, IConfiguration configuration)

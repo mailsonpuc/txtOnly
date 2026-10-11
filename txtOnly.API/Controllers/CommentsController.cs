@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using txtOnly.Application.DTOs;
 using txtOnly.Application.Interfaces;
-using txtOnly.Domain.Validation;
 
 namespace txtOnly.API.Controllers;
 
@@ -23,6 +22,7 @@ public class CommentsController : ControllerBase
     public async Task<ActionResult<object>> GetPaged(Guid postId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var comments = await _commentService.GetCommentsPagedAsync(postId, pageNumber, pageSize);
+        PaginationHeader.Add(Response, comments);
         return Ok(new
         {
             items = comments,
@@ -48,23 +48,8 @@ public class CommentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CommentDTO>> Create([FromBody] CommentCreateDTO comment)
     {
-        try
-        {
-            var createdComment = await _commentService.CreateAsync(comment);
-            return CreatedAtAction(nameof(GetById), new { id = createdComment.CommentId }, createdComment);
-        }
-        catch (ArgumentException exception)
-        {
-            return BadRequest(new { message = exception.Message });
-        }
-        catch (DomainExceptionValidation exception)
-        {
-            return BadRequest(new { message = exception.Message });
-        }
-        catch (KeyNotFoundException exception)
-        {
-            return NotFound(new { message = exception.Message });
-        }
+        var createdComment = await _commentService.CreateAsync(comment);
+        return CreatedAtAction(nameof(GetById), new { id = createdComment.CommentId }, createdComment);
     }
 
     [HttpPut("{id:guid}")]
@@ -78,14 +63,7 @@ public class CommentsController : ControllerBase
         if (await _commentService.GetByIdAsync(id) is null)
             return NotFound();
 
-        try
-        {
-            return Ok(await _commentService.UpdateAsync(comment));
-        }
-        catch (DomainExceptionValidation exception)
-        {
-            return BadRequest(new { message = exception.Message });
-        }
+        return Ok(await _commentService.UpdateAsync(comment));
     }
 
     [HttpDelete("{id:guid}")]

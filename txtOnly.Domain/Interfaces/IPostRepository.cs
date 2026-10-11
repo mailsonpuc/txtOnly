@@ -5,7 +5,7 @@ namespace txtOnly.Domain.Interfaces;
 
 public interface IPostRepository
 {
-    Task<IQueryable<Post>> GetPostsAsync();
+    Task<List<Post>> GetPostsAsync();
     Task<PagedList<Post>> GetPostsPagedAsync(int pageNumber, int pageSize);
     Task<PagedList<Post>> GetPostsByUserPagedAsync(Guid userId, int pageNumber, int pageSize);
     Task<Post?> GetByIdAsync(Guid? id);

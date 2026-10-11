@@ -22,7 +22,7 @@ public class LikeTests
     [Fact]
     public void Deve_Lancar_Excecao_Quando_UserId_For_Vazio()
     {
-        var exception = Assert.Throws<DomainException>(() => new Like(Guid.Empty, Guid.NewGuid()));
+        var exception = Assert.Throws<DomainExceptionValidation>(() => new Like(Guid.Empty, Guid.NewGuid()));
 
         Assert.Equal("UserId is required.", exception.Message);
     }
@@ -30,7 +30,7 @@ public class LikeTests
     [Fact]
     public void Deve_Lancar_Excecao_Quando_PostId_For_Vazio()
     {
-        var exception = Assert.Throws<DomainException>(() => new Like(Guid.NewGuid(), Guid.Empty));
+        var exception = Assert.Throws<DomainExceptionValidation>(() => new Like(Guid.NewGuid(), Guid.Empty));
 
         Assert.Equal("PostId is required.", exception.Message);
     }

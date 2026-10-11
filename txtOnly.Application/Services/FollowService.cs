@@ -3,6 +3,7 @@ using txtOnly.Application.Interfaces;
 using txtOnly.Application.Mappings;
 using txtOnly.Domain.Interfaces;
 using txtOnly.Domain.Pagination;
+using txtOnly.Application.Validation;
 
 namespace txtOnly.Application.Services;
 
@@ -36,8 +37,8 @@ public class FollowService : IFollowService
     public async Task<FollowDTO> CreateAsync(FollowCreateDTO follow)
     {
         ArgumentNullException.ThrowIfNull(follow);
-        await EnsureUserExistsAsync(follow.FollowerId);
-        await EnsureUserExistsAsync(follow.FollowingId);
+        await EntityValidation.EnsureUserExistsAsync(_userRepository, follow.FollowerId);
+        await EntityValidation.EnsureUserExistsAsync(_userRepository, follow.FollowingId);
         if (await _followRepository.GetByUsersAsync(follow.FollowerId, follow.FollowingId) is not null)
             throw new InvalidOperationException("O usuário já segue esta conta.");
 
@@ -56,11 +57,4 @@ public class FollowService : IFollowService
         return removedFollow.ToFollowDTO();
     }
 
-    private async Task EnsureUserExistsAsync(Guid userId)
-    {
-        if (userId == Guid.Empty)
-            throw new ArgumentException("O usuário é obrigatório.", nameof(userId));
-        if (await _userRepository.GetByIdAsync(userId) is null)
-            throw new KeyNotFoundException("Usuário não encontrado.");
-    }
 }

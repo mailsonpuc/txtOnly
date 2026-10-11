@@ -17,7 +17,6 @@ public class UserRepository : IUserRepository
 
     public async Task<PagedList<User>> GetUsersPagedAsync(int pageNumber, int pageSize)
     {
-        ValidatePagination(pageNumber, pageSize);
         var query = _context.Users.AsNoTracking().OrderByDescending(user => user.CreatedAt);
         return await PagedList<User>.ToPagedListAsync(query, pageNumber, pageSize);
     }
@@ -43,11 +42,4 @@ public class UserRepository : IUserRepository
         return Task.FromResult(user);
     }
 
-    private static void ValidatePagination(int pageNumber, int pageSize)
-    {
-        if (pageNumber <= 0)
-            throw new ArgumentOutOfRangeException(nameof(pageNumber), "A página deve ser maior que zero.");
-        if (pageSize <= 0)
-            throw new ArgumentOutOfRangeException(nameof(pageSize), "O tamanho da página deve ser maior que zero.");
-    }
 }

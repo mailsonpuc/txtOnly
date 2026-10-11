@@ -4,6 +4,7 @@ using txtOnly.Application.Mappings;
 using txtOnly.Domain.Entities;
 using txtOnly.Domain.Interfaces;
 using txtOnly.Domain.Pagination;
+using txtOnly.Application.Validation;
 
 namespace txtOnly.Application.Services;
 
@@ -39,8 +40,8 @@ public class CommentService : ICommentService
     public async Task<CommentDTO> CreateAsync(CommentCreateDTO comment)
     {
         ArgumentNullException.ThrowIfNull(comment);
-        await EnsureUserExistsAsync(comment.UserId);
-        await EnsurePostExistsAsync(comment.PostId);
+        await EntityValidation.EnsureUserExistsAsync(_userRepository, comment.UserId);
+        await EntityValidation.EnsurePostExistsAsync(_postRepository, comment.PostId);
         var createdComment = await _commentRepository.CreateAsync(comment.ToComment());
         await _unitOfWork.CommitAsync();
         return createdComment.ToCommentDTO();
@@ -73,20 +74,4 @@ public class CommentService : ICommentService
             ?? throw new KeyNotFoundException("Comentário não encontrado.");
     }
 
-    private async Task EnsureUserExistsAsync(Guid userId)
-    {
-        if (userId == Guid.Empty)
-            throw new ArgumentException("O usuário é obrigatório.", nameof(userId));
-        if (await _userRepository.GetByIdAsync(userId) is null)
-            throw new KeyNotFoundException("Usuário não encontrado.");
-    }
-
-    private async Task EnsurePostExistsAsync(Guid postId)
-    {
-        if (postId == Guid.Empty)
-            throw new ArgumentException("A publicação é obrigatória.", nameof(postId));
-        var post = await _postRepository.GetByIdAsync(postId);
-        if (post is null || post.IsDeleted)
-            throw new KeyNotFoundException("Publicação não encontrada.");
-    }
 }

@@ -22,7 +22,7 @@ public class PostTests
     [Fact]
     public void Deve_Lancar_Excecao_Quando_UserId_For_Vazio()
     {
-        var exception = Assert.Throws<DomainException>(() => new Post(Guid.Empty, "conteudo"));
+        var exception = Assert.Throws<DomainExceptionValidation>(() => new Post(Guid.Empty, "conteudo"));
 
         Assert.Equal("UserId is required.", exception.Message);
     }
@@ -30,7 +30,7 @@ public class PostTests
     [Fact]
     public void Deve_Lancar_Excecao_Quando_Conteudo_For_Vazio()
     {
-        var exception = Assert.Throws<DomainException>(() => new Post(Guid.NewGuid(), "   "));
+        var exception = Assert.Throws<DomainExceptionValidation>(() => new Post(Guid.NewGuid(), "   "));
 
         Assert.Equal("Content is required.", exception.Message);
     }
@@ -40,7 +40,7 @@ public class PostTests
     {
         var content = new string('a', 4001);
 
-        var exception = Assert.Throws<DomainException>(() => new Post(Guid.NewGuid(), content));
+        var exception = Assert.Throws<DomainExceptionValidation>(() => new Post(Guid.NewGuid(), content));
 
         Assert.Equal("Content cannot exceed 4000 characters.", exception.Message);
     }

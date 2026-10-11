@@ -3,6 +3,7 @@ using txtOnly.Application.Interfaces;
 using txtOnly.Application.Mappings;
 using txtOnly.Domain.Interfaces;
 using txtOnly.Domain.Pagination;
+using txtOnly.Application.Validation;
 
 namespace txtOnly.Application.Services;
 
@@ -32,10 +33,8 @@ public class LikeService : ILikeService
     public async Task<LikeDTO> CreateAsync(LikeCreateDTO like)
     {
         ArgumentNullException.ThrowIfNull(like);
-        await EnsureUserExistsAsync(like.UserId);
-        var post = await _postRepository.GetByIdAsync(like.PostId);
-        if (post is null || post.IsDeleted)
-            throw new KeyNotFoundException("Publicação não encontrada.");
+        await EntityValidation.EnsureUserExistsAsync(_userRepository, like.UserId);
+        await EntityValidation.EnsurePostExistsAsync(_postRepository, like.PostId);
         if (await _likeRepository.GetByUserAndPostAsync(like.UserId, like.PostId) is not null)
             throw new InvalidOperationException("O usuário já curtiu esta publicação.");
 
@@ -54,11 +53,4 @@ public class LikeService : ILikeService
         return removedLike.ToLikeDTO();
     }
 
-    private async Task EnsureUserExistsAsync(Guid userId)
-    {
-        if (userId == Guid.Empty)
-            throw new ArgumentException("O usuário é obrigatório.", nameof(userId));
-        if (await _userRepository.GetByIdAsync(userId) is null)
-            throw new KeyNotFoundException("Usuário não encontrado.");
-    }
 }

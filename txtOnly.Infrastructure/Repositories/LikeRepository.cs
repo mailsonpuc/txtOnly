@@ -17,7 +17,6 @@ public class LikeRepository : ILikeRepository
 
     public async Task<PagedList<Like>> GetLikesPagedAsync(Guid postId, int pageNumber, int pageSize)
     {
-        ValidatePagination(pageNumber, pageSize);
         var query = _context.Likes.AsNoTracking().Where(like => like.PostId == postId)
             .OrderByDescending(like => like.CreatedAt);
         return await PagedList<Like>.ToPagedListAsync(query, pageNumber, pageSize);
@@ -40,11 +39,4 @@ public class LikeRepository : ILikeRepository
         return Task.FromResult(like);
     }
 
-    private static void ValidatePagination(int pageNumber, int pageSize)
-    {
-        if (pageNumber <= 0)
-            throw new ArgumentOutOfRangeException(nameof(pageNumber), "A página deve ser maior que zero.");
-        if (pageSize <= 0)
-            throw new ArgumentOutOfRangeException(nameof(pageSize), "O tamanho da página deve ser maior que zero.");
-    }
 }

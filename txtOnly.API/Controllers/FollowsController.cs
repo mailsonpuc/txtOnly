@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using txtOnly.Application.DTOs;
 using txtOnly.Application.Interfaces;
-using txtOnly.Domain.Validation;
 
 namespace txtOnly.API.Controllers;
 
@@ -23,6 +22,7 @@ public class FollowsController : ControllerBase
     public async Task<ActionResult<object>> GetFollowers(Guid userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var follows = await _followService.GetFollowersPagedAsync(userId, pageNumber, pageSize);
+        PaginationHeader.Add(Response, follows);
         return Ok(new
         {
             items = follows,
@@ -38,6 +38,7 @@ public class FollowsController : ControllerBase
     public async Task<ActionResult<object>> GetFollowing(Guid userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var follows = await _followService.GetFollowingPagedAsync(userId, pageNumber, pageSize);
+        PaginationHeader.Add(Response, follows);
         return Ok(new
         {
             items = follows,
@@ -55,27 +56,8 @@ public class FollowsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<FollowDTO>> Create([FromBody] FollowCreateDTO follow)
     {
-        try
-        {
-            var createdFollow = await _followService.CreateAsync(follow);
-            return StatusCode(StatusCodes.Status201Created, createdFollow);
-        }
-        catch (ArgumentException exception)
-        {
-            return BadRequest(new { message = exception.Message });
-        }
-        catch (DomainExceptionValidation exception)
-        {
-            return BadRequest(new { message = exception.Message });
-        }
-        catch (KeyNotFoundException exception)
-        {
-            return NotFound(new { message = exception.Message });
-        }
-        catch (InvalidOperationException exception)
-        {
-            return Conflict(new { message = exception.Message });
-        }
+        var createdFollow = await _followService.CreateAsync(follow);
+        return StatusCode(StatusCodes.Status201Created, createdFollow);
     }
 
     [HttpDelete("follower/{followerId:guid}/following/{followingId:guid}")]
@@ -83,18 +65,11 @@ public class FollowsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid followerId, Guid followingId)
     {
-        try
+        await _followService.RemoveAsync(new FollowDTO
         {
-            await _followService.RemoveAsync(new FollowDTO
-            {
-                FollowerId = followerId,
-                FollowingId = followingId
-            });
-            return NoContent();
-        }
-        catch (KeyNotFoundException exception)
-        {
-            return NotFound(new { message = exception.Message });
-        }
+            FollowerId = followerId,
+            FollowingId = followingId
+        });
+        return NoContent();
     }
 }

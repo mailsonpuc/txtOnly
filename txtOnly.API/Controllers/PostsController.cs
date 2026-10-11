@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using txtOnly.Application.DTOs;
 using txtOnly.Application.Interfaces;
-using txtOnly.Domain.Validation;
 
 namespace txtOnly.API.Controllers;
 
@@ -23,7 +22,7 @@ public class PostsController : ControllerBase
     public async Task<ActionResult<IEnumerable<PostDTO>>> GetAll()
     {
         var posts = await _postService.GetPostsAsync();
-        return Ok(posts.ToList());
+        return Ok(posts);
     }
 
     [HttpGet("pagination")]
@@ -31,6 +30,7 @@ public class PostsController : ControllerBase
     public async Task<ActionResult<object>> GetPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var posts = await _postService.GetPostsPagedAsync(pageNumber, pageSize);
+        PaginationHeader.Add(Response, posts);
         return Ok(new
         {
             items = posts,
@@ -46,6 +46,7 @@ public class PostsController : ControllerBase
     public async Task<ActionResult<object>> GetByUserPaged(Guid userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var posts = await _postService.GetPostsByUserPagedAsync(userId, pageNumber, pageSize);
+        PaginationHeader.Add(Response, posts);
         return Ok(new
         {
             items = posts,
@@ -71,23 +72,8 @@ public class PostsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<PostDTO>> Create([FromBody] PostCreateDTO post)
     {
-        try
-        {
-            var createdPost = await _postService.CreateAsync(post);
-            return CreatedAtAction(nameof(GetById), new { id = createdPost.PostId }, createdPost);
-        }
-        catch (ArgumentException exception)
-        {
-            return BadRequest(new { message = exception.Message });
-        }
-        catch (DomainExceptionValidation exception)
-        {
-            return BadRequest(new { message = exception.Message });
-        }
-        catch (KeyNotFoundException exception)
-        {
-            return NotFound(new { message = exception.Message });
-        }
+        var createdPost = await _postService.CreateAsync(post);
+        return CreatedAtAction(nameof(GetById), new { id = createdPost.PostId }, createdPost);
     }
 
     [HttpPut("{id:guid}")]
@@ -101,18 +87,7 @@ public class PostsController : ControllerBase
         if (await _postService.GetByIdAsync(id) is null)
             return NotFound();
 
-        try
-        {
-            return Ok(await _postService.UpdateAsync(post));
-        }
-        catch (DomainExceptionValidation exception)
-        {
-            return BadRequest(new { message = exception.Message });
-        }
-        catch (InvalidOperationException exception)
-        {
-            return BadRequest(new { message = exception.Message });
-        }
+        return Ok(await _postService.UpdateAsync(post));
     }
 
     [HttpDelete("{id:guid}")]
@@ -133,13 +108,6 @@ public class PostsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<PostDTO>> Restore(Guid id)
     {
-        try
-        {
-            return Ok(await _postService.RestoreAsync(id));
-        }
-        catch (KeyNotFoundException exception)
-        {
-            return NotFound(new { message = exception.Message });
-        }
+        return Ok(await _postService.RestoreAsync(id));
     }
 }

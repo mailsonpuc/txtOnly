@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using txtOnly.Application.DTOs;
 using txtOnly.Application.Interfaces;
-using txtOnly.Domain.Validation;
 
 namespace txtOnly.API.Controllers;
 
@@ -23,6 +22,7 @@ public class UsersController : ControllerBase
     public async Task<ActionResult<object>> GetPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var users = await _userService.GetUsersPagedAsync(pageNumber, pageSize);
+        PaginationHeader.Add(Response, users);
         return Ok(new
         {
             items = users,
@@ -47,15 +47,8 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<UserDTO>> Create([FromBody] UserCreateDTO user)
     {
-        try
-        {
-            var createdUser = await _userService.CreateAsync(user);
-            return CreatedAtAction(nameof(GetById), new { id = createdUser.UserId }, createdUser);
-        }
-        catch (DomainExceptionValidation exception)
-        {
-            return BadRequest(new { message = exception.Message });
-        }
+        var createdUser = await _userService.CreateAsync(user);
+        return CreatedAtAction(nameof(GetById), new { id = createdUser.UserId }, createdUser);
     }
 
     [HttpPut("{id:guid}")]
@@ -70,13 +63,6 @@ public class UsersController : ControllerBase
         if (await _userService.GetByIdAsync(id) is null)
             return NotFound();
 
-        try
-        {
-            return Ok(await _userService.UpdateAsync(user));
-        }
-        catch (DomainExceptionValidation exception)
-        {
-            return BadRequest(new { message = exception.Message });
-        }
+        return Ok(await _userService.UpdateAsync(user));
     }
 }

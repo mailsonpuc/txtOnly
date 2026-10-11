@@ -23,7 +23,7 @@ public class CommentTests
     [Fact]
     public void Deve_Lancar_Excecao_Quando_UserId_For_Vazio()
     {
-        var exception = Assert.Throws<DomainException>(() => new Comment(Guid.Empty, Guid.NewGuid(), "comentario"));
+        var exception = Assert.Throws<DomainExceptionValidation>(() => new Comment(Guid.Empty, Guid.NewGuid(), "comentario"));
 
         Assert.Equal("UserId is required.", exception.Message);
     }
@@ -31,7 +31,7 @@ public class CommentTests
     [Fact]
     public void Deve_Lancar_Excecao_Quando_PostId_For_Vazio()
     {
-        var exception = Assert.Throws<DomainException>(() => new Comment(Guid.NewGuid(), Guid.Empty, "comentario"));
+        var exception = Assert.Throws<DomainExceptionValidation>(() => new Comment(Guid.NewGuid(), Guid.Empty, "comentario"));
 
         Assert.Equal("PostId is required.", exception.Message);
     }
@@ -39,7 +39,7 @@ public class CommentTests
     [Fact]
     public void Deve_Lancar_Excecao_Quando_Conteudo_For_Invalido()
     {
-        var exception = Assert.Throws<DomainException>(() => new Comment(Guid.NewGuid(), Guid.NewGuid(), "   "));
+        var exception = Assert.Throws<DomainExceptionValidation>(() => new Comment(Guid.NewGuid(), Guid.NewGuid(), "   "));
 
         Assert.Equal("Content is required.", exception.Message);
     }

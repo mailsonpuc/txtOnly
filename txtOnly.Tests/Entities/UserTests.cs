@@ -23,7 +23,7 @@ public class UserTests
     [Fact]
     public void Deve_Lancar_Excecao_Quando_UserId_For_Vazio()
     {
-        var exception = Assert.Throws<DomainException>(() => new User(Guid.Empty, "bio"));
+        var exception = Assert.Throws<DomainExceptionValidation>(() => new User(Guid.Empty, "bio"));
 
         Assert.Equal("UserId is required.", exception.Message);
     }
@@ -42,7 +42,7 @@ public class UserTests
         var user = new User(Guid.NewGuid(), "bio");
         var bio = new string('x', 201);
 
-        var exception = Assert.Throws<DomainException>(() => user.UpdateBio(bio));
+        var exception = Assert.Throws<DomainExceptionValidation>(() => user.UpdateBio(bio));
 
         Assert.Equal("Bio cannot exceed 200 characters.", exception.Message);
     }

@@ -17,7 +17,6 @@ public class CommentRepository : ICommentRepository
 
     public async Task<PagedList<Comment>> GetCommentsPagedAsync(Guid postId, int pageNumber, int pageSize)
     {
-        ValidatePagination(pageNumber, pageSize);
         var query = _context.Comments.AsNoTracking().Where(comment => comment.PostId == postId)
             .OrderBy(comment => comment.CreatedAt);
         return await PagedList<Comment>.ToPagedListAsync(query, pageNumber, pageSize);
@@ -51,11 +50,4 @@ public class CommentRepository : ICommentRepository
         return Task.FromResult(comment);
     }
 
-    private static void ValidatePagination(int pageNumber, int pageSize)
-    {
-        if (pageNumber <= 0)
-            throw new ArgumentOutOfRangeException(nameof(pageNumber), "A página deve ser maior que zero.");
-        if (pageSize <= 0)
-            throw new ArgumentOutOfRangeException(nameof(pageSize), "O tamanho da página deve ser maior que zero.");
-    }
 }

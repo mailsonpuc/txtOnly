@@ -5,7 +5,7 @@ namespace txtOnly.Application.Interfaces;
 
 public interface IPostService
 {
-    Task<IQueryable<PostDTO>> GetPostsAsync();
+    Task<List<PostDTO>> GetPostsAsync();
     Task<PagedList<PostDTO>> GetPostsPagedAsync(int pageNumber, int pageSize);
     Task<PagedList<PostDTO>> GetPostsByUserPagedAsync(Guid userId, int pageNumber, int pageSize);
     Task<PostDTO?> GetByIdAsync(Guid? id);

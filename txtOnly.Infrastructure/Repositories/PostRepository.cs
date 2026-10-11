@@ -15,17 +15,16 @@ public class PostRepository : IPostRepository
         _context = context;
     }
 
-    public Task<IQueryable<Post>> GetPostsAsync()
+    public async Task<List<Post>> GetPostsAsync()
     {
-        IQueryable<Post> query = _context.Posts.AsNoTracking()
+        return await _context.Posts.AsNoTracking()
             .Where(post => !post.IsDeleted)
-            .OrderByDescending(post => post.CreatedAt);
-        return Task.FromResult(query);
+            .OrderByDescending(post => post.CreatedAt)
+            .ToListAsync();
     }
 
     public async Task<PagedList<Post>> GetPostsPagedAsync(int pageNumber, int pageSize)
     {
-        ValidatePagination(pageNumber, pageSize);
         var query = _context.Posts.AsNoTracking()
             .Where(post => !post.IsDeleted)
             .OrderByDescending(post => post.CreatedAt);
@@ -34,7 +33,6 @@ public class PostRepository : IPostRepository
 
     public async Task<PagedList<Post>> GetPostsByUserPagedAsync(Guid userId, int pageNumber, int pageSize)
     {
-        ValidatePagination(pageNumber, pageSize);
         var query = _context.Posts.AsNoTracking()
             .Where(post => post.UserId == userId && !post.IsDeleted)
             .OrderByDescending(post => post.CreatedAt);
@@ -62,11 +60,4 @@ public class PostRepository : IPostRepository
         return Task.FromResult(post);
     }
 
-    private static void ValidatePagination(int pageNumber, int pageSize)
-    {
-        if (pageNumber <= 0)
-            throw new ArgumentOutOfRangeException(nameof(pageNumber), "A página deve ser maior que zero.");
-        if (pageSize <= 0)
-            throw new ArgumentOutOfRangeException(nameof(pageSize), "O tamanho da página deve ser maior que zero.");
-    }
 }

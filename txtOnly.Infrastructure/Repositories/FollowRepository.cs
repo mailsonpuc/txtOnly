@@ -17,7 +17,6 @@ public class FollowRepository : IFollowRepository
 
     public async Task<PagedList<Follow>> GetFollowersPagedAsync(Guid userId, int pageNumber, int pageSize)
     {
-        ValidatePagination(pageNumber, pageSize);
         var query = _context.Follows.AsNoTracking().Where(follow => follow.FollowingId == userId)
             .OrderByDescending(follow => follow.CreatedAt);
         return await PagedList<Follow>.ToPagedListAsync(query, pageNumber, pageSize);
@@ -25,7 +24,6 @@ public class FollowRepository : IFollowRepository
 
     public async Task<PagedList<Follow>> GetFollowingPagedAsync(Guid userId, int pageNumber, int pageSize)
     {
-        ValidatePagination(pageNumber, pageSize);
         var query = _context.Follows.AsNoTracking().Where(follow => follow.FollowerId == userId)
             .OrderByDescending(follow => follow.CreatedAt);
         return await PagedList<Follow>.ToPagedListAsync(query, pageNumber, pageSize);
@@ -49,11 +47,4 @@ public class FollowRepository : IFollowRepository
         return Task.FromResult(follow);
     }
 
-    private static void ValidatePagination(int pageNumber, int pageSize)
-    {
-        if (pageNumber <= 0)
-            throw new ArgumentOutOfRangeException(nameof(pageNumber), "A página deve ser maior que zero.");
-        if (pageSize <= 0)
-            throw new ArgumentOutOfRangeException(nameof(pageSize), "O tamanho da página deve ser maior que zero.");
-    }
 }

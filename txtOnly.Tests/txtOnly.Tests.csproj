@@ -20,6 +20,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\txtOnly.Domain\txtOnly.Domain.csproj" />
+    <ProjectReference Include="..\txtOnly.Application\txtOnly.Application.csproj" />
+    <ProjectReference Include="..\txtOnly.API\txtOnly.API.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
 </Project>
