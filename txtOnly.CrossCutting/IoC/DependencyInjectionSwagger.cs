@@ -23,7 +23,20 @@ public static class DependencyInjectionSwagger
 
             options.PostProcess = document =>
             {
-                document.Info.Description = "API RESTful para publicação e interação com conteúdo social.";
+                document.Info.Description =
+                    "API RESTful de rede social para gerenciamento de conteúdo em Clean Architecture";
+
+                document.Info.Contact = new OpenApiContact
+                {
+                    Name = "GitHub Contact",
+                    Url = "https://github.com/mailsonpuc"
+                };
+
+                document.Info.License = new OpenApiLicense
+                {
+                    Name = "MIT",
+                    Url = "https://opensource.org/licenses/MIT"
+                };
             };
 
             options.AddSecurity(
