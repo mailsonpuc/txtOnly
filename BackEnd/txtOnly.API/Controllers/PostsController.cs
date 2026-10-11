@@ -8,7 +8,7 @@ namespace txtOnly.API.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class PostsController : ControllerBase
+public class PostsController : AuthenticatedControllerBase
 {
     private readonly IPostService _postService;
 
@@ -72,6 +72,10 @@ public class PostsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<PostDTO>> Create([FromBody] PostCreateDTO post)
     {
+        if (!TryGetCurrentUserId(out var currentUserId))
+            return Unauthorized();
+
+        post.UserId = currentUserId;
         var createdPost = await _postService.CreateAsync(post);
         return CreatedAtAction(nameof(GetById), new { id = createdPost.PostId }, createdPost);
     }
@@ -84,9 +88,17 @@ public class PostsController : ControllerBase
     {
         if (id != post.PostId)
             return BadRequest("O ID da rota deve ser igual ao ID da publicação.");
-        if (await _postService.GetByIdAsync(id) is null)
-            return NotFound();
 
+        if (!TryGetCurrentUserId(out var currentUserId))
+            return Unauthorized();
+
+        var existingPost = await _postService.GetByIdAsync(id);
+        if (existingPost is null)
+            return NotFound();
+        if (existingPost.UserId != currentUserId)
+            return Forbid();
+
+        post.UserId = currentUserId;
         return Ok(await _postService.UpdateAsync(post));
     }
 
@@ -95,9 +107,14 @@ public class PostsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid id)
     {
+        if (!TryGetCurrentUserId(out var currentUserId))
+            return Unauthorized();
+
         var post = await _postService.GetByIdAsync(id);
         if (post is null)
             return NotFound();
+        if (post.UserId != currentUserId)
+            return Forbid();
 
         await _postService.RemoveAsync(post);
         return NoContent();
@@ -108,6 +125,15 @@ public class PostsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<PostDTO>> Restore(Guid id)
     {
+        if (!TryGetCurrentUserId(out var currentUserId))
+            return Unauthorized();
+
+        var post = await _postService.GetByIdAsync(id);
+        if (post is null)
+            return NotFound();
+        if (post.UserId != currentUserId)
+            return Forbid();
+
         return Ok(await _postService.RestoreAsync(id));
     }
 }

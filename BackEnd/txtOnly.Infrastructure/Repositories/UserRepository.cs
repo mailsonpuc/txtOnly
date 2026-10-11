@@ -3,6 +3,7 @@ using txtOnly.Domain.Entities;
 using txtOnly.Domain.Interfaces;
 using txtOnly.Domain.Pagination;
 using txtOnly.Infrastructure.Context;
+using txtOnly.Infrastructure.Identity;
 
 namespace txtOnly.Infrastructure.Repositories;
 
@@ -26,6 +27,18 @@ public class UserRepository : IUserRepository
         if (!id.HasValue || id.Value == Guid.Empty)
             return null;
         return await _context.Users.AsNoTracking().FirstOrDefaultAsync(user => user.UserId == id.Value);
+    }
+
+    public async Task<IReadOnlyDictionary<Guid, string>> GetUserNamesAsync(IEnumerable<Guid> userIds)
+    {
+        var ids = userIds.Distinct().ToArray();
+        if (ids.Length == 0)
+            return new Dictionary<Guid, string>();
+
+        return await _context.Set<ApplicationUser>()
+            .AsNoTracking()
+            .Where(user => ids.Contains(user.Id))
+            .ToDictionaryAsync(user => user.Id, user => user.UserName ?? string.Empty);
     }
 
     public async Task<User> CreateAsync(User user)

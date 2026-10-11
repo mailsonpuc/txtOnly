@@ -8,7 +8,7 @@ namespace txtOnly.API.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class UsersController : ControllerBase
+public class UsersController : AuthenticatedControllerBase
 {
     private readonly IUserService _userService;
 
@@ -47,6 +47,10 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<UserDTO>> Create([FromBody] UserCreateDTO user)
     {
+        if (!TryGetCurrentUserId(out var currentUserId))
+            return Unauthorized();
+
+        user.UserId = currentUserId;
         var createdUser = await _userService.CreateAsync(user);
         return CreatedAtAction(nameof(GetById), new { id = createdUser.UserId }, createdUser);
     }
@@ -59,6 +63,11 @@ public class UsersController : ControllerBase
     {
         if (id != user.UserId)
             return BadRequest("O ID da rota deve ser igual ao ID do usuário.");
+
+        if (!TryGetCurrentUserId(out var currentUserId))
+            return Unauthorized();
+        if (id != currentUserId)
+            return Forbid();
 
         if (await _userService.GetByIdAsync(id) is null)
             return NotFound();

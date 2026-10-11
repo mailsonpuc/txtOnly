@@ -8,7 +8,7 @@ namespace txtOnly.API.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class FollowsController : ControllerBase
+public class FollowsController : AuthenticatedControllerBase
 {
     private readonly IFollowService _followService;
 
@@ -56,6 +56,10 @@ public class FollowsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<FollowDTO>> Create([FromBody] FollowCreateDTO follow)
     {
+        if (!TryGetCurrentUserId(out var currentUserId))
+            return Unauthorized();
+
+        follow.FollowerId = currentUserId;
         var createdFollow = await _followService.CreateAsync(follow);
         return StatusCode(StatusCodes.Status201Created, createdFollow);
     }
@@ -65,6 +69,11 @@ public class FollowsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid followerId, Guid followingId)
     {
+        if (!TryGetCurrentUserId(out var currentUserId))
+            return Unauthorized();
+        if (followerId != currentUserId)
+            return Forbid();
+
         await _followService.RemoveAsync(new FollowDTO
         {
             FollowerId = followerId,

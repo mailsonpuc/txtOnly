@@ -9,6 +9,7 @@ public class UserCreateDTO
 public class UserDTO
 {
     public Guid UserId { get; set; }
+    public string UserName { get; set; } = string.Empty;
     public string Bio { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
 }

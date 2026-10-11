@@ -17,6 +17,7 @@ public class PostTests
         Assert.Equal("Olá, mundo!", post.Content);
         Assert.False(post.IsDeleted);
         Assert.NotEqual(default, post.CreatedAt);
+        Assert.Null(post.UpdatedAt);
     }
 
     [Fact]
@@ -56,6 +57,17 @@ public class PostTests
 
         post.Restore();
         Assert.False(post.IsDeleted);
+        Assert.NotNull(post.UpdatedAt);
+    }
+
+    [Fact]
+    public void Deve_Definir_UpdatedAt_Ao_Editar_Conteudo()
+    {
+        var post = new Post(Guid.NewGuid(), "Conteudo original");
+
+        post.UpdateContent("Conteudo editado");
+
+        Assert.Equal("Conteudo editado", post.Content);
         Assert.NotNull(post.UpdatedAt);
     }
 }

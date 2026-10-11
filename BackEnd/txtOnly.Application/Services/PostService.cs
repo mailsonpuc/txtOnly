@@ -24,13 +24,16 @@ public class PostService : IPostService
     public async Task<List<PostDTO>> GetPostsAsync()
     {
         var posts = await _postRepository.GetPostsAsync();
-        return posts.Select(post => post.ToPostDTO()).ToList();
+        var postDtos = posts.Select(post => post.ToPostDTO()).ToList();
+        await AddUserNamesAsync(postDtos);
+        return postDtos;
     }
 
     public async Task<PagedList<PostDTO>> GetPostsPagedAsync(int pageNumber, int pageSize)
     {
         var posts = await _postRepository.GetPostsPagedAsync(pageNumber, pageSize);
         var postDtos = posts.Select(post => post.ToPostDTO()).ToList();
+        await AddUserNamesAsync(postDtos);
         return new PagedList<PostDTO>(postDtos, posts.TotalCount, posts.CurrentPage, posts.PageSize);
     }
 
@@ -38,13 +41,19 @@ public class PostService : IPostService
     {
         var posts = await _postRepository.GetPostsByUserPagedAsync(userId, pageNumber, pageSize);
         var postDtos = posts.Select(post => post.ToPostDTO()).ToList();
+        await AddUserNamesAsync(postDtos);
         return new PagedList<PostDTO>(postDtos, posts.TotalCount, posts.CurrentPage, posts.PageSize);
     }
 
     public async Task<PostDTO?> GetByIdAsync(Guid? id)
     {
         var post = await _postRepository.GetByIdAsync(id);
-        return post?.ToPostDTO();
+        if (post is null)
+            return null;
+
+        var postDto = post.ToPostDTO();
+        await AddUserNamesAsync([postDto]);
+        return postDto;
     }
 
     public async Task<PostDTO> CreateAsync(PostCreateDTO post)
@@ -53,7 +62,9 @@ public class PostService : IPostService
         await EntityValidation.EnsureUserExistsAsync(_userRepository, post.UserId);
         var createdPost = await _postRepository.CreateAsync(post.ToPost());
         await _unitOfWork.CommitAsync();
-        return createdPost.ToPostDTO();
+        var postDto = createdPost.ToPostDTO();
+        await AddUserNamesAsync([postDto]);
+        return postDto;
     }
 
     public async Task<PostDTO> UpdateAsync(PostDTO post)
@@ -65,7 +76,9 @@ public class PostService : IPostService
         post.ApplyTo(postEntity);
         var updatedPost = await _postRepository.UpdateAsync(postEntity);
         await _unitOfWork.CommitAsync();
-        return updatedPost.ToPostDTO();
+        var postDto = updatedPost.ToPostDTO();
+        await AddUserNamesAsync([postDto]);
+        return postDto;
     }
 
     public async Task<PostDTO> RemoveAsync(PostDTO post)
@@ -76,7 +89,9 @@ public class PostService : IPostService
             postEntity.Delete();
         var removedPost = await _postRepository.UpdateAsync(postEntity);
         await _unitOfWork.CommitAsync();
-        return removedPost.ToPostDTO();
+        var postDto = removedPost.ToPostDTO();
+        await AddUserNamesAsync([postDto]);
+        return postDto;
     }
 
     public async Task<PostDTO> RestoreAsync(Guid id)
@@ -86,7 +101,19 @@ public class PostService : IPostService
             postEntity.Restore();
         var restoredPost = await _postRepository.UpdateAsync(postEntity);
         await _unitOfWork.CommitAsync();
-        return restoredPost.ToPostDTO();
+        var postDto = restoredPost.ToPostDTO();
+        await AddUserNamesAsync([postDto]);
+        return postDto;
+    }
+
+    private async Task AddUserNamesAsync(IReadOnlyCollection<PostDTO> posts)
+    {
+        var names = await _userRepository.GetUserNamesAsync(posts.Select(post => post.UserId));
+        foreach (var post in posts)
+        {
+            if (names.TryGetValue(post.UserId, out var userName))
+                post.UserName = userName;
+        }
     }
 
     private async Task<Post> GetEntityByIdAsync(Guid id)

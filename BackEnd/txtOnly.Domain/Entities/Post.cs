@@ -33,7 +33,7 @@ public class Post
         PostId = Guid.NewGuid();
         UserId = userId;
         CreatedAt = DateTime.UtcNow;
-        UpdateContent(content);
+        Content = ValidateContent(content);
     }
 
     public void UpdateContent(string content)

@@ -8,7 +8,7 @@ namespace txtOnly.API.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class CommentsController : ControllerBase
+public class CommentsController : AuthenticatedControllerBase
 {
     private readonly ICommentService _commentService;
 
@@ -48,6 +48,10 @@ public class CommentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CommentDTO>> Create([FromBody] CommentCreateDTO comment)
     {
+        if (!TryGetCurrentUserId(out var currentUserId))
+            return Unauthorized();
+
+        comment.UserId = currentUserId;
         var createdComment = await _commentService.CreateAsync(comment);
         return CreatedAtAction(nameof(GetById), new { id = createdComment.CommentId }, createdComment);
     }
@@ -60,9 +64,17 @@ public class CommentsController : ControllerBase
     {
         if (id != comment.CommentId)
             return BadRequest("O ID da rota deve ser igual ao ID do comentário.");
-        if (await _commentService.GetByIdAsync(id) is null)
-            return NotFound();
 
+        if (!TryGetCurrentUserId(out var currentUserId))
+            return Unauthorized();
+
+        var existingComment = await _commentService.GetByIdAsync(id);
+        if (existingComment is null)
+            return NotFound();
+        if (existingComment.UserId != currentUserId)
+            return Forbid();
+
+        comment.UserId = currentUserId;
         return Ok(await _commentService.UpdateAsync(comment));
     }
 
@@ -71,9 +83,14 @@ public class CommentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid id)
     {
+        if (!TryGetCurrentUserId(out var currentUserId))
+            return Unauthorized();
+
         var comment = await _commentService.GetByIdAsync(id);
         if (comment is null)
             return NotFound();
+        if (comment.UserId != currentUserId)
+            return Forbid();
 
         await _commentService.RemoveAsync(comment);
         return NoContent();

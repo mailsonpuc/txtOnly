@@ -22,13 +22,19 @@ public class UserService : IUserService
     {
         var users = await _userRepository.GetUsersPagedAsync(pageNumber, pageSize);
         var userDtos = users.Select(user => user.ToUserDTO()).ToList();
+        await AddUserNamesAsync(userDtos);
         return new PagedList<UserDTO>(userDtos, users.TotalCount, users.CurrentPage, users.PageSize);
     }
 
     public async Task<UserDTO?> GetByIdAsync(Guid? id)
     {
         var user = await _userRepository.GetByIdAsync(id);
-        return user?.ToUserDTO();
+        if (user is null)
+            return null;
+
+        var userDto = user.ToUserDTO();
+        await AddUserNamesAsync([userDto]);
+        return userDto;
     }
 
     public async Task<UserDTO> CreateAsync(UserCreateDTO user)
@@ -36,7 +42,9 @@ public class UserService : IUserService
         ArgumentNullException.ThrowIfNull(user);
         var createdUser = await _userRepository.CreateAsync(user.ToUser());
         await _unitOfWork.CommitAsync();
-        return createdUser.ToUserDTO();
+        var userDto = createdUser.ToUserDTO();
+        await AddUserNamesAsync([userDto]);
+        return userDto;
     }
 
     public async Task<UserDTO> UpdateAsync(UserDTO user)
@@ -46,7 +54,19 @@ public class UserService : IUserService
         user.ApplyTo(userEntity);
         var updatedUser = await _userRepository.UpdateAsync(userEntity);
         await _unitOfWork.CommitAsync();
-        return updatedUser.ToUserDTO();
+        var userDto = updatedUser.ToUserDTO();
+        await AddUserNamesAsync([userDto]);
+        return userDto;
+    }
+
+    private async Task AddUserNamesAsync(IReadOnlyCollection<UserDTO> users)
+    {
+        var names = await _userRepository.GetUserNamesAsync(users.Select(user => user.UserId));
+        foreach (var user in users)
+        {
+            if (names.TryGetValue(user.UserId, out var userName))
+                user.UserName = userName;
+        }
     }
 
     private async Task<User> GetEntityByIdAsync(Guid id)

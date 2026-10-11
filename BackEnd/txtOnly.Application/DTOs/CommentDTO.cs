@@ -15,4 +15,5 @@ public class CommentDTO
     public DateTime? UpdatedAt { get; set; }
     public Guid PostId { get; set; }
     public Guid UserId { get; set; }
+    public string UserName { get; set; } = string.Empty;
 }

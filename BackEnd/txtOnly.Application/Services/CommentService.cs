@@ -28,13 +28,19 @@ public class CommentService : ICommentService
     {
         var comments = await _commentRepository.GetCommentsPagedAsync(postId, pageNumber, pageSize);
         var commentDtos = comments.Select(comment => comment.ToCommentDTO()).ToList();
+        await AddUserNamesAsync(commentDtos);
         return new PagedList<CommentDTO>(commentDtos, comments.TotalCount, comments.CurrentPage, comments.PageSize);
     }
 
     public async Task<CommentDTO?> GetByIdAsync(Guid? id)
     {
         var comment = await _commentRepository.GetByIdAsync(id);
-        return comment?.ToCommentDTO();
+        if (comment is null)
+            return null;
+
+        var commentDto = comment.ToCommentDTO();
+        await AddUserNamesAsync([commentDto]);
+        return commentDto;
     }
 
     public async Task<CommentDTO> CreateAsync(CommentCreateDTO comment)
@@ -44,7 +50,9 @@ public class CommentService : ICommentService
         await EntityValidation.EnsurePostExistsAsync(_postRepository, comment.PostId);
         var createdComment = await _commentRepository.CreateAsync(comment.ToComment());
         await _unitOfWork.CommitAsync();
-        return createdComment.ToCommentDTO();
+        var commentDto = createdComment.ToCommentDTO();
+        await AddUserNamesAsync([commentDto]);
+        return commentDto;
     }
 
     public async Task<CommentDTO> UpdateAsync(CommentDTO comment)
@@ -54,7 +62,9 @@ public class CommentService : ICommentService
         comment.ApplyTo(commentEntity);
         var updatedComment = await _commentRepository.UpdateAsync(commentEntity);
         await _unitOfWork.CommitAsync();
-        return updatedComment.ToCommentDTO();
+        var commentDto = updatedComment.ToCommentDTO();
+        await AddUserNamesAsync([commentDto]);
+        return commentDto;
     }
 
     public async Task<CommentDTO> RemoveAsync(CommentDTO comment)
@@ -63,7 +73,19 @@ public class CommentService : ICommentService
         var commentEntity = await GetEntityByIdAsync(comment.CommentId);
         var removedComment = await _commentRepository.RemoveAsync(commentEntity);
         await _unitOfWork.CommitAsync();
-        return removedComment.ToCommentDTO();
+        var commentDto = removedComment.ToCommentDTO();
+        await AddUserNamesAsync([commentDto]);
+        return commentDto;
+    }
+
+    private async Task AddUserNamesAsync(IReadOnlyCollection<CommentDTO> comments)
+    {
+        var names = await _userRepository.GetUserNamesAsync(comments.Select(comment => comment.UserId));
+        foreach (var comment in comments)
+        {
+            if (names.TryGetValue(comment.UserId, out var userName))
+                comment.UserName = userName;
+        }
     }
 
     private async Task<Comment> GetEntityByIdAsync(Guid id)

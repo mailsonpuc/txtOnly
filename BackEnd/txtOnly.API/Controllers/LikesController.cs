@@ -8,7 +8,7 @@ namespace txtOnly.API.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class LikesController : ControllerBase
+public class LikesController : AuthenticatedControllerBase
 {
     private readonly ILikeService _likeService;
 
@@ -40,6 +40,10 @@ public class LikesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<LikeDTO>> Create([FromBody] LikeCreateDTO like)
     {
+        if (!TryGetCurrentUserId(out var currentUserId))
+            return Unauthorized();
+
+        like.UserId = currentUserId;
         var createdLike = await _likeService.CreateAsync(like);
         return StatusCode(StatusCodes.Status201Created, createdLike);
     }
@@ -49,6 +53,11 @@ public class LikesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid userId, Guid postId)
     {
+        if (!TryGetCurrentUserId(out var currentUserId))
+            return Unauthorized();
+        if (userId != currentUserId)
+            return Forbid();
+
         await _likeService.RemoveAsync(new LikeDTO { UserId = userId, PostId = postId });
         return NoContent();
     }
