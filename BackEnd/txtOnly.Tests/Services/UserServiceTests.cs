@@ -50,6 +50,5 @@ public class UserServiceTests
         public Task<PagedList<User>> GetUsersPagedAsync(int pageNumber, int pageSize) => throw new NotSupportedException();
         public Task<User> CreateAsync(User entity) => throw new NotSupportedException();
         public Task<User> UpdateAsync(User entity) => throw new NotSupportedException();
-        public Task<PagedList<User>> GetUsersByNamePagedAsync(string userName, int pageNumber, int pageSize) => throw new NotSupportedException();
     }
 }

@@ -37,6 +37,8 @@ public class FollowService : IFollowService
     public async Task<FollowDTO> CreateAsync(FollowCreateDTO follow)
     {
         ArgumentNullException.ThrowIfNull(follow);
+        if (follow.FollowerId == follow.FollowingId)
+            throw new InvalidOperationException("Você não pode seguir a si mesmo.");
         await EntityValidation.EnsureUserExistsAsync(_userRepository, follow.FollowerId);
         await EntityValidation.EnsureUserExistsAsync(_userRepository, follow.FollowingId);
         if (await _followRepository.GetByUsersAsync(follow.FollowerId, follow.FollowingId) is not null)
