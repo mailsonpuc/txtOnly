@@ -25,7 +25,8 @@ public static class DependencyInjectionCors
                 
                     )
                     .WithMethods("GET", "POST", "PUT", "DELETE")
-                    .WithHeaders("Content-Type", "Authorization");
+                    .WithHeaders("Content-Type", "Authorization")
+                    .WithExposedHeaders("X-Pagination", "Server");
             });
         });
 
