@@ -35,6 +35,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .feed-intro span:last-child { color: var(--muted); font-family: var(--mono); font-size: 9px; }
 .directory-intro { margin: 0; padding: 13px 17px; color: var(--muted); font-size: 11px; }
 
+.search-bar { display: flex; align-items: center; gap: 8px; padding: 11px 17px; border-bottom: 1px solid #282828; }
+.search-bar input { flex: 1; min-width: 0; min-height: 32px; padding: 6px 9px; border: 1px solid #343434; border-radius: 3px; background: #161616; color: var(--white); font-family: inherit; font-size: 11px; }
+.search-bar input::placeholder { color: #777; }
+.search-bar button { flex: 0 0 auto; min-height: 32px; padding: 0 11px; border: 1px solid #30633c; border-radius: 3px; background: #132018; color: var(--green); font-family: var(--mono); font-size: 10px; cursor: pointer; }
+.search-bar button:hover { background: #1a2a1e; }
+
 .user-avatar { display: inline-grid; flex: 0 0 auto; place-items: center; width: 40px; height: 40px; border: 1px solid #28693c; border-radius: 3px; background: #101911; color: var(--green); font-family: var(--mono); font-size: 14px; }
 .user-avatar-large { width: 45px; height: 45px; font-size: 16px; }
 .composer { display: grid; gap: 11px; margin: 0; padding: 15px 17px 13px; border: 0; border-bottom: 1px solid #292929; background: #101010; }

@@ -22,6 +22,21 @@ public class UserServiceTests
         Assert.Equal("Bio de teste", user.Bio);
     }
 
+    [Fact]
+    public async Task GetUsersByNamePagedAsync_ReturnsIdentityNamesAndPagination()
+    {
+        var userId = Guid.NewGuid();
+        var repository = new StubUserRepository(new User(userId, "Bio de teste"), "mailson");
+        var service = new UserService(null!, repository);
+
+        var result = await service.GetUsersByNamePagedAsync("mail", 1, 10);
+
+        var user = Assert.Single(result);
+        Assert.Equal("mailson", user.UserName);
+        Assert.Equal(1, result.CurrentPage);
+        Assert.Equal(1, result.TotalCount);
+    }
+
     private sealed class StubUserRepository(User user, string userName) : IUserRepository
     {
         public Task<User?> GetByIdAsync(Guid? id) => Task.FromResult<User?>(id == user.UserId ? user : null);
@@ -29,8 +44,12 @@ public class UserServiceTests
         public Task<IReadOnlyDictionary<Guid, string>> GetUserNamesAsync(IEnumerable<Guid> userIds) =>
             Task.FromResult<IReadOnlyDictionary<Guid, string>>(new Dictionary<Guid, string> { [user.UserId] = userName });
 
+        public Task<PagedList<User>> GetUsersByNamePagedAsync(string searchName, int pageNumber, int pageSize) =>
+            Task.FromResult(new PagedList<User>([user], 1, pageNumber, pageSize));
+
         public Task<PagedList<User>> GetUsersPagedAsync(int pageNumber, int pageSize) => throw new NotSupportedException();
         public Task<User> CreateAsync(User entity) => throw new NotSupportedException();
         public Task<User> UpdateAsync(User entity) => throw new NotSupportedException();
+        public Task<PagedList<User>> GetUsersByNamePagedAsync(string userName, int pageNumber, int pageSize) => throw new NotSupportedException();
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using txtOnly.Application.DTOs;
 using txtOnly.Application.Interfaces;
+using txtOnly.API.Pagination;
 
 namespace txtOnly.API.Controllers;
 
@@ -19,9 +20,29 @@ public class UsersController : AuthenticatedControllerBase
 
     [HttpGet("pagination")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<object>> GetPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<object>> GetPaged([FromQuery] PageQueryParameters parameters)
     {
-        var users = await _userService.GetUsersPagedAsync(pageNumber, pageSize);
+        var users = await _userService.GetUsersPagedAsync(parameters.PageNumber, parameters.PageSize);
+        PaginationHeader.Add(Response, users);
+        return Ok(new
+        {
+            items = users,
+            currentPage = users.CurrentPage,
+            pageSize = users.PageSize,
+            totalPages = users.TotalPages,
+            totalCount = users.TotalCount
+        });
+    }
+
+    [HttpGet("filter-by-name")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<object>> FilterByName([FromQuery] UserNameFilterParameters parameters)
+    {
+        if (string.IsNullOrWhiteSpace(parameters.UserName))
+            return BadRequest("O parâmetro userName é obrigatório.");
+
+        var users = await _userService.GetUsersByNamePagedAsync(parameters.UserName, parameters.PageNumber, parameters.PageSize);
         PaginationHeader.Add(Response, users);
         return Ok(new
         {

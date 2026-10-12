@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using txtOnly.Application.DTOs;
 using txtOnly.Application.Interfaces;
+using txtOnly.API.Pagination;
 
 namespace txtOnly.API.Controllers;
 
@@ -27,9 +28,9 @@ public class PostsController : AuthenticatedControllerBase
 
     [HttpGet("pagination")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<object>> GetPaged([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<object>> GetPaged([FromQuery] PageQueryParameters parameters)
     {
-        var posts = await _postService.GetPostsPagedAsync(pageNumber, pageSize);
+        var posts = await _postService.GetPostsPagedAsync(parameters.PageNumber, parameters.PageSize);
         PaginationHeader.Add(Response, posts);
         return Ok(new
         {
@@ -43,9 +44,9 @@ public class PostsController : AuthenticatedControllerBase
 
     [HttpGet("user/{userId:guid}/pagination")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<object>> GetByUserPaged(Guid userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<object>> GetByUserPaged(Guid userId, [FromQuery] PageQueryParameters parameters)
     {
-        var posts = await _postService.GetPostsByUserPagedAsync(userId, pageNumber, pageSize);
+        var posts = await _postService.GetPostsByUserPagedAsync(userId, parameters.PageNumber, parameters.PageSize);
         PaginationHeader.Add(Response, posts);
         return Ok(new
         {

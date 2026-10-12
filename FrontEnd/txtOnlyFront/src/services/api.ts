@@ -77,6 +77,8 @@ export const usersApi = {
   get: (id: string) => apiClient.get<UserDTO>(`/Users/${id}`),
   list: (pageNumber = 1, pageSize = 50) =>
     apiClient.get<PageDTO<UserDTO>>('/Users/pagination', { params: { pageNumber, pageSize } }),
+  filterByName: (userName: string, pageNumber = 1, pageSize = 50) =>
+    apiClient.get<PageDTO<UserDTO>>('/Users/filter-by-name', { params: { userName, pageNumber, pageSize } }),
   create: (payload: { userId: string; bio: string }) => apiClient.post<UserDTO>('/Users', payload),
   update: (user: UserDTO) => apiClient.put<UserDTO>(`/Users/${user.userId}`, user),
 }

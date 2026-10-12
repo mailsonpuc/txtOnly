@@ -22,6 +22,20 @@ public class UserRepository : IUserRepository
         return await PagedList<User>.ToPagedListAsync(query, pageNumber, pageSize);
     }
 
+    public async Task<PagedList<User>> GetUsersByNamePagedAsync(string userName, int pageNumber, int pageSize)
+    {
+        var normalizedName = userName.Trim().ToUpperInvariant();
+        var query =
+            from user in _context.Users.AsNoTracking()
+            join identityUser in _context.Set<ApplicationUser>().AsNoTracking()
+                on user.UserId equals identityUser.Id
+            where identityUser.NormalizedUserName != null && identityUser.NormalizedUserName.Contains(normalizedName)
+            orderby user.CreatedAt descending
+            select user;
+
+        return await PagedList<User>.ToPagedListAsync(query, pageNumber, pageSize);
+    }
+
     public async Task<User?> GetByIdAsync(Guid? id)
     {
         if (!id.HasValue || id.Value == Guid.Empty)

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using txtOnly.Application.DTOs;
 using txtOnly.Application.Interfaces;
+using txtOnly.API.Pagination;
 
 namespace txtOnly.API.Controllers;
 
@@ -19,9 +20,9 @@ public class CommentsController : AuthenticatedControllerBase
 
     [HttpGet("post/{postId:guid}/pagination")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<object>> GetPaged(Guid postId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<object>> GetPaged(Guid postId, [FromQuery] PageQueryParameters parameters)
     {
-        var comments = await _commentService.GetCommentsPagedAsync(postId, pageNumber, pageSize);
+        var comments = await _commentService.GetCommentsPagedAsync(postId, parameters.PageNumber, parameters.PageSize);
         PaginationHeader.Add(Response, comments);
         return Ok(new
         {

@@ -15,12 +15,17 @@ export function PeoplePage() {
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState('')
   const [error, setError] = useState('')
+  const [query, setQuery] = useState('')
 
   useEffect(() => {
     let active = true
     if (!user) return () => { active = false }
+    setLoading(true)
+    const request = query.trim()
+      ? usersApi.filterByName(query, page, 20)
+      : usersApi.list(page, 20)
     Promise.all([
-        usersApi.list(page, 20),
+        request,
         listAllFollowing(user.id),
     ]).then(([usersResponse, followingList]) => {
       if (!active) return
@@ -34,7 +39,7 @@ export function PeoplePage() {
       if (active) setLoading(false)
     })
     return () => { active = false }
-  }, [page, user])
+  }, [page, user, query])
 
   async function toggleFollow(targetId: string) {
     if (!user) return
@@ -59,6 +64,16 @@ export function PeoplePage() {
   return (
     <div className="page-stack">
       <p className="directory-intro">Conheça as pessoas que escrevem por aqui.</p>
+      <form className="search-bar" onSubmit={(event) => { event.preventDefault(); setPage(1) }}>
+        <input
+          type="text"
+          placeholder="pesquisar por nome de usuário"
+          value={query}
+          onChange={(event) => { setQuery(event.target.value); setPage(1) }}
+        />
+        <button type="submit">[ buscar ]</button>
+      </form>
+
       {error && <Notice>{error}</Notice>}
       {loading ? <LoadingLine>listando usuários...</LoadingLine> : people.length === 0 ? <p className="empty-line">// nenhum outro perfil encontrado</p> : <ul className="people-list">
         {people.map((person) => <li className="person-row" key={person.userId}>

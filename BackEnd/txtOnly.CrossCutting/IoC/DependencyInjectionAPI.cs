@@ -17,12 +17,18 @@ public static class DependencyInjectionAPI
         // ===============================
         // CONTEXTO DO BANCO DE DADOS. Usando sql Server
         // ===============================
+        
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(
                 configuration.GetConnectionString("DefaultConnection"),
                 b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)
             )
         );
+        
+        
+         //Usando em InMemory
+       // services.AddDbContext<AppDbContext>(opt => opt.UseInMemoryDatabase("DataBase"));
+
 
 
 

@@ -26,6 +26,15 @@ public class UserService : IUserService
         return new PagedList<UserDTO>(userDtos, users.TotalCount, users.CurrentPage, users.PageSize);
     }
 
+    public async Task<PagedList<UserDTO>> GetUsersByNamePagedAsync(string userName, int pageNumber, int pageSize)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(userName);
+        var users = await _userRepository.GetUsersByNamePagedAsync(userName, pageNumber, pageSize);
+        var userDtos = users.Select(user => user.ToUserDTO()).ToList();
+        await AddUserNamesAsync(userDtos);
+        return new PagedList<UserDTO>(userDtos, users.TotalCount, users.CurrentPage, users.PageSize);
+    }
+
     public async Task<UserDTO?> GetByIdAsync(Guid? id)
     {
         var user = await _userRepository.GetByIdAsync(id);

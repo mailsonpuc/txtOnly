@@ -32,6 +32,7 @@ public class PostServiceTests
         public Task<User> CreateAsync(User user) => throw new NotSupportedException();
         public Task<User> UpdateAsync(User user) => throw new NotSupportedException();
         public Task<PagedList<User>> GetUsersPagedAsync(int pageNumber, int pageSize) => throw new NotSupportedException();
+        public Task<PagedList<User>> GetUsersByNamePagedAsync(string userName, int pageNumber, int pageSize) => throw new NotSupportedException();
     }
 
     private sealed class StubPostRepository(List<Post> posts) : IPostRepository

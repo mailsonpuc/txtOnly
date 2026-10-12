@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using txtOnly.Application.DTOs;
 using txtOnly.Application.Interfaces;
+using txtOnly.API.Pagination;
 
 namespace txtOnly.API.Controllers;
 
@@ -19,9 +20,9 @@ public class FollowsController : AuthenticatedControllerBase
 
     [HttpGet("user/{userId:guid}/followers")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<object>> GetFollowers(Guid userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<object>> GetFollowers(Guid userId, [FromQuery] PageQueryParameters parameters)
     {
-        var follows = await _followService.GetFollowersPagedAsync(userId, pageNumber, pageSize);
+        var follows = await _followService.GetFollowersPagedAsync(userId, parameters.PageNumber, parameters.PageSize);
         PaginationHeader.Add(Response, follows);
         return Ok(new
         {
@@ -35,9 +36,9 @@ public class FollowsController : AuthenticatedControllerBase
 
     [HttpGet("user/{userId:guid}/following")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<object>> GetFollowing(Guid userId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<object>> GetFollowing(Guid userId, [FromQuery] PageQueryParameters parameters)
     {
-        var follows = await _followService.GetFollowingPagedAsync(userId, pageNumber, pageSize);
+        var follows = await _followService.GetFollowingPagedAsync(userId, parameters.PageNumber, parameters.PageSize);
         PaginationHeader.Add(Response, follows);
         return Ok(new
         {
